@@ -362,7 +362,7 @@ export function deriveInstalledPluginProjection(input: InstalledProjectionInput)
   }
 
   return decodeInstalledPluginListResult({
-    profileName: 'web',
+    profileName: 'desktop',
     profileRevision: input.fingerprint.profileRevision,
     catalogFreshness: input.catalog.freshness,
     items,

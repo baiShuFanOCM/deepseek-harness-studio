@@ -139,8 +139,8 @@ function exact(source: Record<string, unknown>, keys: readonly string[], label: 
 function decodeProfileIdentity(value: unknown): PluginProfileIdentity {
   const source = record(value, 'profileIdentity')
   exact(source, ['profileName', 'rootSha256'], 'profileIdentity')
-  if (source['profileName'] !== 'web') throw new Error('profile snapshot profileName must equal web')
-  return { profileName: 'web', rootSha256: sha256(source['rootSha256'], 'rootSha256') }
+  if (source['profileName'] !== 'desktop') throw new Error('profile snapshot profileName must equal desktop')
+  return { profileName: 'desktop', rootSha256: sha256(source['rootSha256'], 'rootSha256') }
 }
 
 function decodeBase64(value: unknown, path: AuthorityFile): Buffer | null {
@@ -319,10 +319,10 @@ export class ProfileSnapshotStore {
     private readonly now: () => Date = () => new Date(),
   ) {}
 
-  /** Return the canonical hash-bound identity of the selected web Profile. */
+  /** Return the canonical hash-bound identity of the selected desktop Profile. */
   async identity(): Promise<PluginProfileIdentity> {
     await requireDirectory(this.profileDirectory, 'Profile root')
-    return { profileName: 'web', rootSha256: digest(await realpath(this.profileDirectory)) }
+    return { profileName: 'desktop', rootSha256: digest(await realpath(this.profileDirectory)) }
   }
 
   /** Capture a complete immutable snapshot before the first mutation phase. */

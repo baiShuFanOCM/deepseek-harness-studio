@@ -32,7 +32,7 @@ function writeBundle(profile: string, packageName: string, version: string, entr
 function fixture(): { readonly home: string; readonly profile: string } {
   const home = mkdtempSync(join(tmpdir(), 'dsh-plugin-profile-'))
   roots.push(home)
-  const profile = join(home, 'profiles/web')
+  const profile = join(home, 'profiles/desktop')
   mkdirSync(profile, { recursive: true })
   const bundles = [WORKSPACE_CANDIDATE.packageName, '@local/unknown-bundle']
   writeFileSync(join(profile, 'package.json'), `${JSON.stringify({
@@ -59,7 +59,7 @@ function fixture(): { readonly home: string; readonly profile: string } {
 function read(home: string) {
   return readProfileCompatibilityFingerprint({
     homeDirectory: home,
-    profileName: 'web',
+    profileName: 'desktop',
     desktopVersion: '0.1.0-rc.5',
     dshVersion: '0.1.0-rc.5',
     nodeVersion: '22.22.0',

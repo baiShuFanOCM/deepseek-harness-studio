@@ -31,5 +31,5 @@ None; this package neither assembles nor sends a provider request.
 ## Known Limitations and Deferred Work
 
 - This package validates values but does not fetch catalogs, download archives, mutate a Profile, restart the Host, or prove runtime activation; Desktop owns those effects.
-- V1 mutation platforms are limited to packaged macOS arm64 and Windows x64, with artifacts restricted to approved HTTPS origins including the public npm registry.
+- V1 mutation platforms cover packaged macOS arm64 and x64, Windows x64, and Linux x64 and arm64, with artifacts restricted to approved HTTPS origins including the public npm registry.
 - Registry integrity, digests, package identity, and risk labels reduce supply-chain uncertainty but do not constitute a DeepSeek security review or isolate plugin code; installed Host plugins retain broad application authority.

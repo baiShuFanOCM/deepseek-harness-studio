@@ -44,7 +44,7 @@ describe('trusted Plugin Center installation', () => {
   it('runs one ordered install transaction and commits only after joined runtime evidence', async () => {
     const root = await temporaryRoot()
     const home = join(root, 'dsh-home')
-    const profile = join(home, 'profiles', 'web')
+    const profile = join(home, 'profiles', 'desktop')
     const operations = join(root, 'operations')
     const candidate = BUNDLED_CATALOG.preflights.find(value => value.pluginId === 'fixture.workspace-tools')
     if (candidate === undefined) throw new Error('reviewed workspace-tools fixture is missing')
@@ -58,7 +58,7 @@ describe('trusted Plugin Center installation', () => {
     })
     const readFingerprint = (current: CatalogPreflightSelection) => readProfileCompatibilityFingerprint({
       homeDirectory: home,
-      profileName: 'web',
+      profileName: 'desktop',
       desktopVersion: '0.1.0-rc.5',
       dshVersion: '0.1.0-rc.5',
       nodeVersion: '22.22.0',

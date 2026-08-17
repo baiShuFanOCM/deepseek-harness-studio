@@ -31,5 +31,5 @@ Preset 广场使用独立的闭合合同，不扩展插件目录类型。其列�
 ## 已知限制与暂缓事项
 
 - 本包只验证值，不负责获取目录、下载压缩包、变更 Profile、重启 Host 或证明运行态激活；这些副作用由 Desktop 拥有。
-- V1 变更平台只包括打包的 macOS arm64 与 Windows x64，制品仅允许来自包括公开 npm registry 在内的已批准 HTTPS origin。
+- V1 变更平台覆盖打包的 macOS arm64 与 x64、Windows x64，以及 Linux x64 与 arm64，制品仅允许来自包括公开 npm registry 在内的已批准 HTTPS origin。
 - registry 完整性、摘要、包身份与风险标签只能降低供应链不确定性，不构成 DeepSeek 安全审计，也不能隔离插件代码；已安装 Host 插件仍拥有广泛应用权限。

@@ -365,6 +365,8 @@ export interface SpawnDshWebOptions {
   readonly cwd: string
   /** Frozen environment for the Host process. */
   readonly env: NodeJS.ProcessEnv
+  /** Bundled pnpm entry injected as `DSH_PNPM_ENTRY` for Host plugin management. */
+  readonly packageManagerEntry?: string
   /** Run the Electron executable as its bundled Node runtime. */
   readonly electronRunAsNode?: boolean
 }
@@ -385,10 +387,15 @@ function streamAdapter(stream: NodeJS.ReadableStream): HostChild['stdout'] {
  * @returns The child handle consumed by {@link createHostSupervisor}.
  */
 export function spawnDshWeb(options: SpawnDshWebOptions): HostChild {
-  const env = options.electronRunAsNode
-    ? { ...options.env, ELECTRON_RUN_AS_NODE: '1' }
-    : options.env
-  const process = spawn(options.nodeExecutable, ['--expose-internals', options.cliEntry, 'web', '--host', '127.0.0.1', '--port', '0'], {
+  const env = {
+    ...options.env,
+    ...(options.electronRunAsNode ? { ELECTRON_RUN_AS_NODE: '1' } : {}),
+    // dsh plugin management resolves its pnpm through DSH_PNPM_ENTRY when
+    // present, so a packaged Host never depends on a PATH pnpm that a
+    // GUI-launched Electron process does not inherit.
+    ...(options.packageManagerEntry === undefined ? {} : { DSH_PNPM_ENTRY: options.packageManagerEntry }),
+  }
+  const process = spawn(options.nodeExecutable, ['--expose-internals', options.cliEntry, '--profile', 'desktop', '--host', '127.0.0.1', '--port', '0'], {
     cwd: options.cwd,
     env,
     stdio: ['ignore', 'pipe', 'pipe'],

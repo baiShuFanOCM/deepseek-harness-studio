@@ -177,7 +177,7 @@ export class PluginOperationController {
         schemaVersion: 1,
         operationId: this.createOperationId(),
         idempotencyKey: request.idempotencyKey,
-        profileName: 'web',
+        profileName: 'desktop',
         action: request.action,
         pluginId: request.pluginId,
         version: request.version,

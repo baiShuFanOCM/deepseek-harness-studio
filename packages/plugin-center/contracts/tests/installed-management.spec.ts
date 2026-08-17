@@ -49,7 +49,7 @@ const CATALOG_ITEM = {
 
 function installedResult() {
   return {
-    profileName: 'web',
+    profileName: 'desktop',
     profileRevision: 7,
     catalogFreshness: 'fresh',
     items: [CATALOG_ITEM, {

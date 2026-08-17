@@ -126,8 +126,15 @@ export const COMPATIBILITY_ACTIONS = ['install', 'update', 'enable', 'disable', 
 /** One closed Plugin Center mutation intent. */
 export type CompatibilityAction = typeof COMPATIBILITY_ACTIONS[number]
 
+/** The single desktop Profile whose mutations Plugin Center owns. */
+export const PLUGIN_CENTER_PROFILE_NAME = 'desktop' as const
+/** Literal type of the desktop Profile identity carried by Plugin Center contracts. */
+export type PluginCenterProfileName = typeof PLUGIN_CENTER_PROFILE_NAME
+
 /** Desktop targets supported by the first curated marketplace release. */
-export const SUPPORTED_PLUGIN_PLATFORMS = ['darwin-arm64', 'win32-x64'] as const
+export const SUPPORTED_PLUGIN_PLATFORMS = [
+  'darwin-arm64', 'darwin-x64', 'win32-x64', 'linux-x64', 'linux-arm64',
+] as const
 /** One supported operating-system and architecture tuple. */
 export type SupportedPluginPlatform = typeof SUPPORTED_PLUGIN_PLATFORMS[number]
 
@@ -301,7 +308,7 @@ export interface InstalledPluginProjection {
 
 /** Renderer-safe installed projection for the selected Desktop Profile. */
 export interface InstalledPluginListResult {
-  readonly profileName: 'web'
+  readonly profileName: PluginCenterProfileName
   readonly profileRevision: number
   readonly catalogFreshness: CatalogFreshness
   readonly items: readonly InstalledPluginProjection[]
@@ -527,7 +534,7 @@ export interface PluginOperationSnapshot {
   readonly schemaVersion: 1
   readonly operationId: string
   readonly idempotencyKey: string
-  readonly profileName: 'web'
+  readonly profileName: PluginCenterProfileName
   readonly action: CompatibilityAction
   readonly pluginId: string
   readonly version: string
@@ -545,7 +552,7 @@ export type PluginOperationStartResult =
 
 /** Hash-bound identity of the only Profile F005 may restore. */
 export interface PluginProfileIdentity {
-  readonly profileName: 'web'
+  readonly profileName: PluginCenterProfileName
   readonly rootSha256: string
 }
 
@@ -651,7 +658,7 @@ export type PluginRecoveryDiagnostic =
     readonly schemaVersion: 1
     readonly journalStatus: 'readable'
     readonly operationId: string
-    readonly profileName: 'web'
+    readonly profileName: PluginCenterProfileName
     readonly action: CompatibilityAction
     readonly pluginId: string
     readonly version: string
@@ -1024,7 +1031,7 @@ export interface PresetRuntimeRequest {
 
 const ID = /^[a-z0-9]+(?:[._-][a-z0-9]+)*$/u
 const VERSION = /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$/u
-const PLATFORM = /^(?:darwin|win32)-(?:arm64|x64)$/u
+const PLATFORM = /^(?:darwin|linux|win32)-(?:arm64|x64)$/u
 const PACKAGE_NAME = /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/u
 const SHA256 = /^[0-9a-f]{64}$/u
 const SHA512_INTEGRITY = /^sha512-[A-Za-z0-9+/]{86}==$/u
@@ -1847,7 +1854,7 @@ export function decodePluginManagementRequest(value: unknown): PluginManagementR
 export function decodeInstalledPluginListResult(value: unknown): InstalledPluginListResult {
   const source = record(value, '$installed')
   exact(source, '$installed', ['profileName', 'profileRevision', 'catalogFreshness', 'items'])
-  if (source['profileName'] !== 'web') fail('$installed.profileName', 'must equal web')
+  if (source['profileName'] !== PLUGIN_CENTER_PROFILE_NAME) fail('$installed.profileName', 'must equal desktop')
   const items = array(source['items'], '$installed.items', 1_000, installedProjection)
   if (new Set(items.map(item => item.packageName)).size !== items.length) {
     fail('$installed.items', 'must not contain duplicate package names')
@@ -1857,7 +1864,7 @@ export function decodeInstalledPluginListResult(value: unknown): InstalledPlugin
     fail('$installed.items', 'must not contain duplicate plugin ids')
   }
   return {
-    profileName: 'web',
+    profileName: PLUGIN_CENTER_PROFILE_NAME,
     profileRevision: integer(source['profileRevision'], '$installed.profileRevision', 0, 2_147_483_647),
     catalogFreshness: enumeration(source['catalogFreshness'], '$installed.catalogFreshness', FRESHNESS),
     items,
@@ -1953,7 +1960,7 @@ export function decodePluginOperationSnapshot(value: unknown): PluginOperationSn
     'phase', 'startedAt', 'updatedAt', 'hostGeneration', 'failureCode',
   ])
   if (source['schemaVersion'] !== 1) fail('$operation.schemaVersion', 'must equal 1')
-  if (source['profileName'] !== 'web') fail('$operation.profileName', 'must equal web')
+  if (source['profileName'] !== PLUGIN_CENTER_PROFILE_NAME) fail('$operation.profileName', 'must equal desktop')
   const operationId = id(source['operationId'], '$operation.operationId')
   const idempotencyKey = string(source['idempotencyKey'], '$operation.idempotencyKey', 128)
   if (!IDEMPOTENCY_KEY.test(idempotencyKey)) {
@@ -1977,7 +1984,7 @@ export function decodePluginOperationSnapshot(value: unknown): PluginOperationSn
     schemaVersion: 1,
     operationId,
     idempotencyKey,
-    profileName: 'web',
+    profileName: PLUGIN_CENTER_PROFILE_NAME,
     action: enumeration(source['action'], '$operation.action', COMPATIBILITY_ACTIONS),
     pluginId: id(source['pluginId'], '$operation.pluginId'),
     version: version(source['version'], '$operation.version'),
@@ -2018,8 +2025,8 @@ function evidenceIdentity(value: unknown, path: string): string {
 function profileIdentity(value: unknown, path: string): PluginProfileIdentity {
   const source = record(value, path)
   exact(source, path, ['profileName', 'rootSha256'])
-  if (source['profileName'] !== 'web') fail(`${path}.profileName`, 'must equal web')
-  return { profileName: 'web', rootSha256: sha256(source['rootSha256'], `${path}.rootSha256`) }
+  if (source['profileName'] !== PLUGIN_CENTER_PROFILE_NAME) fail(`${path}.profileName`, 'must equal desktop')
+  return { profileName: PLUGIN_CENTER_PROFILE_NAME, rootSha256: sha256(source['rootSha256'], `${path}.rootSha256`) }
 }
 
 function runtimeEntryEvidence(value: unknown, path: string): PluginRuntimeEntryEvidence {
@@ -2376,12 +2383,12 @@ export function decodePluginRecoveryDiagnostic(value: unknown): PluginRecoveryDi
       exportedAt,
     }
   }
-  if (source['profileName'] !== 'web') fail('$diagnostic.profileName', 'must equal web')
+  if (source['profileName'] !== PLUGIN_CENTER_PROFILE_NAME) fail('$diagnostic.profileName', 'must equal desktop')
   return {
     schemaVersion: 1,
     journalStatus,
     operationId,
-    profileName: 'web',
+    profileName: PLUGIN_CENTER_PROFILE_NAME,
     action: enumeration(source['action'], '$diagnostic.action', COMPATIBILITY_ACTIONS),
     pluginId: id(source['pluginId'], '$diagnostic.pluginId'),
     version: version(source['version'], '$diagnostic.version'),

@@ -52,7 +52,7 @@ function initialRecord(): PluginTransactionJournalRecord {
     schemaVersion: 1 as const,
     operationId: OPERATION_ID,
     idempotencyKey: 'install:fixture.workspace-tools:1',
-    profileName: 'web' as const,
+    profileName: 'desktop' as const,
     action: 'install' as const,
     pluginId: 'fixture.workspace-tools',
     version: '1.0.0',
@@ -67,7 +67,7 @@ function initialRecord(): PluginTransactionJournalRecord {
     header: {
       operationId: OPERATION_ID,
       idempotencyKey: operation.idempotencyKey,
-      profileIdentity: { profileName: 'web', rootSha256: 'a'.repeat(64) },
+      profileIdentity: { profileName: 'desktop', rootSha256: 'a'.repeat(64) },
       action: 'install',
       pluginId: operation.pluginId,
       version: operation.version,

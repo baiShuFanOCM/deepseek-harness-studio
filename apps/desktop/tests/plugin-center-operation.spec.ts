@@ -13,7 +13,7 @@ import { ProfileMutationBusyError, ProfileMutationLock } from '../src/plugin-cen
 import { ProfileSnapshotStore } from '../src/plugin-center/profile-snapshot-store.ts'
 
 const roots: string[] = []
-const PROFILE_IDENTITY: PluginProfileIdentity = { profileName: 'web', rootSha256: 'a'.repeat(64) }
+const PROFILE_IDENTITY: PluginProfileIdentity = { profileName: 'desktop', rootSha256: 'a'.repeat(64) }
 
 function runtimeEvidence() {
   return { entries: [], clientModules: [], skillIds: [] }

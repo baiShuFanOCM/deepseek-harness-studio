@@ -22,7 +22,7 @@ describe('fixed Plugin Center package manager', () => {
       platform: 'darwin' as const,
       executable: '/Applications/DeepSeek Harness.app/Contents/MacOS/DeepSeek Harness',
       entry: '/Applications/DeepSeek Harness.app/Contents/Resources/host/node_modules/pnpm/bin/pnpm.cjs',
-      profile: '/Users/fixture/.dsh/profiles/web',
+      profile: '/Users/fixture/.dsh/profiles/desktop',
       store: '/Users/fixture/Library/Application Support/DeepSeek Harness/plugin-store',
       home: '/Users/fixture',
       electronRunAsNode: true,

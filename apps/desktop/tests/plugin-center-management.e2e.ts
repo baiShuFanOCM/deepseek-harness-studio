@@ -99,7 +99,7 @@ async function harness(
   await mkdir(root, { recursive: true })
   roots.push(root)
   const home = join(root, 'dsh-home')
-  const profile = join(home, 'profiles', 'web')
+  const profile = join(home, 'profiles', 'desktop')
   const configPath = join(home, 'config', 'plugins', `${PLUGIN_ID}.json`)
   initProfile(profile, [])
   await writeBundle(profile, CURRENT_VERSION)
@@ -125,7 +125,7 @@ async function harness(
   })
   const readFingerprint = (value: CatalogPreflightSelection) => readProfileCompatibilityFingerprint({
     homeDirectory: home,
-    profileName: 'web',
+    profileName: 'desktop',
     desktopVersion: '0.1.0-rc.5',
     dshVersion: '0.1.0-rc.5',
     nodeVersion: '22.22.0',

@@ -191,7 +191,7 @@ async function createHarness(
   await mkdir(root, { recursive: true })
   roots.push(root)
   const home = join(root, 'dsh-home')
-  const profile = join(home, 'profiles', 'web')
+  const profile = join(home, 'profiles', 'desktop')
   initProfile(profile, [])
   await mkdir(join(profile, 'node_modules'), { recursive: true })
   await writeFile(join(profile, 'pnpm-lock.yaml'), `lockfileVersion: '9.0'\nfixture: ${action === 'install' ? 'none' : CURRENT_VERSION}\n`)
@@ -223,7 +223,7 @@ async function createHarness(
   })
   const readFingerprint = (value: CatalogPreflightSelection) => readProfileCompatibilityFingerprint({
     homeDirectory: home,
-    profileName: 'web',
+    profileName: 'desktop',
     desktopVersion: '0.1.0-rc.5',
     dshVersion: '0.1.0-rc.5',
     nodeVersion: '22.22.0',

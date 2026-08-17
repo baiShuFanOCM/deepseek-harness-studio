@@ -72,7 +72,7 @@ async function harness(): Promise<{
       await controls.recordFoundation(fingerprint(true), {
         snapshotId: 'owned-snapshot-1',
         snapshotSha256: 'a'.repeat(64),
-        profileIdentity: { profileName: 'web', rootSha256: 'b'.repeat(64) },
+        profileIdentity: { profileName: 'desktop', rootSha256: 'b'.repeat(64) },
         runtimeEvidence: runtimeEvidence(),
       })
       return {
@@ -81,7 +81,7 @@ async function harness(): Promise<{
         runtimeEvidence: runtimeEvidence(),
       }
     },
-    () => ({ profileName: 'web', rootSha256: 'b'.repeat(64) }),
+    () => ({ profileName: 'desktop', rootSha256: 'b'.repeat(64) }),
     async () => {},
     clock(),
     () => OPERATION_ID,

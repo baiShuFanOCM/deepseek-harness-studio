@@ -390,8 +390,41 @@ describe('desktop Host process', () => {
 
     expect(spawn).toHaveBeenCalledWith(
       '/Applications/DeepSeek Harness.app/Contents/MacOS/DeepSeek Harness',
-      ['--expose-internals', expect.stringContaining('/Resources/host/node_modules/@deepseek-ai/dsh/lib/bin.js'), 'web', '--host', '127.0.0.1', '--port', '0'],
+      ['--expose-internals', expect.stringContaining('/Resources/host/node_modules/@deepseek-ai/dsh/lib/bin.js'), '--profile', 'desktop', '--host', '127.0.0.1', '--port', '0'],
       expect.objectContaining({ env: { DSH_DESKTOP: '1', ELECTRON_RUN_AS_NODE: '1' } }),
+    )
+  })
+
+  it('injects the bundled package manager entry so plugin management needs no PATH pnpm', async () => {
+    const spawned = {
+      stdout: { on: vi.fn(), off: vi.fn() },
+      stderr: { on: vi.fn(), off: vi.fn() },
+      on: vi.fn(),
+      off: vi.fn(),
+      kill: vi.fn(),
+    }
+    vi.mocked(spawn).mockReturnValue(spawned as never)
+
+    const { spawnDshWeb } = await import('../src/host-supervisor.ts')
+    spawnDshWeb({
+      nodeExecutable: '/Applications/DeepSeek Harness.app/Contents/MacOS/DeepSeek Harness',
+      cliEntry: '/Applications/DeepSeek Harness.app/Contents/Resources/host/node_modules/@deepseek-ai/dsh/lib/bin.js',
+      packageManagerEntry: '/Applications/DeepSeek Harness.app/Contents/Resources/host/node_modules/pnpm/bin/pnpm.cjs',
+      cwd: '/Users/tester',
+      env: { DSH_DESKTOP: '1' },
+      electronRunAsNode: true,
+    })
+
+    expect(spawn).toHaveBeenCalledWith(
+      '/Applications/DeepSeek Harness.app/Contents/MacOS/DeepSeek Harness',
+      ['--expose-internals', expect.stringContaining('/Resources/host/node_modules/@deepseek-ai/dsh/lib/bin.js'), '--profile', 'desktop', '--host', '127.0.0.1', '--port', '0'],
+      expect.objectContaining({
+        env: {
+          DSH_DESKTOP: '1',
+          ELECTRON_RUN_AS_NODE: '1',
+          DSH_PNPM_ENTRY: '/Applications/DeepSeek Harness.app/Contents/Resources/host/node_modules/pnpm/bin/pnpm.cjs',
+        },
+      }),
     )
   })
 })

@@ -73,7 +73,7 @@ async function seedOpenJournal(input: {
     schemaVersion: 1 as const,
     operationId: OPERATION_ID,
     idempotencyKey: 'install:fixture.workspace-tools:1',
-    profileName: 'web' as const,
+    profileName: 'desktop' as const,
     action: 'install' as const,
     pluginId: 'fixture.workspace-tools',
     version: '1.0.0',

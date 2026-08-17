@@ -273,11 +273,17 @@ function manifestVersion(path: string): string {
   return manifest.version
 }
 
-/** Load the app-local tray template, with an empty fallback for incomplete staging. */
+/** Load the app-local tray icon, with an empty fallback for incomplete staging. */
 function trayImage(): Electron.NativeImage {
-  const candidates = app.isPackaged
-    ? [join(process.resourcesPath, 'desktop-resources/trayTemplate.png')]
-    : [join(DESKTOP_DIR, 'resources/trayTemplate.png')]
+  // macOS tray icons are monochrome templates tinted by the system; Linux
+  // StatusNotifierItem shows the raw image, so use the colored app icon there.
+  const candidates = process.platform === 'linux'
+    ? (app.isPackaged
+      ? [join(process.resourcesPath, 'desktop-resources/icon.png'), join(process.resourcesPath, 'desktop-resources/trayTemplate.png')]
+      : [join(DESKTOP_DIR, 'build/icon.png'), join(DESKTOP_DIR, 'resources/trayTemplate.png')])
+    : (app.isPackaged
+      ? [join(process.resourcesPath, 'desktop-resources/trayTemplate.png')]
+      : [join(DESKTOP_DIR, 'resources/trayTemplate.png')])
   const path = candidates.find(candidate => existsSync(candidate))
   const image = path === undefined ? nativeImage.createEmpty() : nativeImage.createFromPath(path)
   if (process.platform === 'darwin') image.setTemplateImage(true)
@@ -320,27 +326,33 @@ async function createMainWindow(): Promise<BrowserWindow> {
     show: false,
     autoHideMenuBar: true,
     frame: process.platform === 'win32',
-    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden',
-    ...(process.platform === 'darwin' ? {} : {
+    ...(process.platform === 'darwin' ? {
+      titleBarStyle: 'hiddenInset' as const,
+      trafficLightPosition: { x: 16, y: 18 },
+      vibrancy: 'sidebar' as const,
+      visualEffectState: 'followWindow' as const,
+    } : process.platform === 'win32' ? {
+      titleBarStyle: 'hidden' as const,
       titleBarOverlay: {
         color: '#00000000',
         symbolColor: '#7f858f',
         height: 44,
       },
+    } : {
+      // Linux has no native window material and no titleBarOverlay support;
+      // the renderer supplies its own drag region on an opaque window.
+      titleBarStyle: 'hidden' as const,
     }),
-    ...(process.platform === 'darwin' ? {
-      trafficLightPosition: { x: 16, y: 18 },
-      vibrancy: 'sidebar' as const,
-      visualEffectState: 'followWindow' as const,
-    } : {}),
     ...(process.platform === 'win32' ? {
       backgroundMaterial: 'acrylic' as const,
       hasShadow: true,
       roundedCorners: true,
       thickFrame: true,
-    } : {
+    } : process.platform === 'darwin' ? {
       transparent: true,
       backgroundColor: '#00000000',
+    } : {
+      // Linux keeps an ordinary opaque surface (see ui-theme base.css).
     }),
     title: APP_NAME,
     webPreferences: {
@@ -401,7 +413,7 @@ function registerDesktopBridge(): PluginCenterBackend {
     activeOperation: boolean,
   ): CompatibilityFingerprint => readProfileCompatibilityFingerprint({
     homeDirectory: resolveDshHome(),
-    profileName: 'web',
+    profileName: 'desktop',
     desktopVersion: app.getVersion(),
     dshVersion: manifestVersion(paths.cliManifest),
     nodeVersion: process.versions.node,
@@ -535,7 +547,7 @@ function registerDesktopBridge(): PluginCenterBackend {
       ? null
       : await new PluginRuntimeVerifier().readEvidence(generation.origin).catch(() => null)
     return deriveInstalledPluginProjection({
-      profileDirectory: join(resolveDshHome(), 'profiles', 'web'),
+      profileDirectory: join(resolveDshHome(), 'profiles', 'desktop'),
       installAnchor: paths.cliManifest,
       fingerprint,
       catalog: authority,
@@ -629,7 +641,7 @@ async function initializePluginOperations(backend: PluginCenterBackend): Promise
     throw new Error('plugin operation backend requires the current Host and window lifecycle')
   }
   const dshHome = resolveDshHome()
-  const profileDirectory = join(dshHome, 'profiles', 'web')
+  const profileDirectory = join(dshHome, 'profiles', 'desktop')
   const root = join(app.getPath('userData'), 'plugin-center')
   const operationsDirectory = join(root, 'operations')
   const journal = new PluginOperationJournal(join(root, 'journal'))
@@ -696,9 +708,9 @@ async function initializePluginOperations(backend: PluginCenterBackend): Promise
     journal,
     recovery,
     startNormalHost: async () => {
-      const webProfileBundles = PROFILE_TEMPLATES['web']
-      if (webProfileBundles === undefined) throw new Error('web Profile template is unavailable')
-      initProfile(profileDirectory, [...webProfileBundles, ...BUILT_IN_APPLICATION_BUNDLES])
+      const desktopProfileBundles = PROFILE_TEMPLATES['desktop']
+      if (desktopProfileBundles === undefined) throw new Error('desktop Profile template is unavailable')
+      initProfile(profileDirectory, [...desktopProfileBundles, ...BUILT_IN_APPLICATION_BUNDLES])
       reconcileBuiltInApplications(profileDirectory, BUILT_IN_APPLICATION_BUNDLES)
       for (const manifestPath of backend.paths.shippedBundleManifests) {
         const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as { readonly name?: string }

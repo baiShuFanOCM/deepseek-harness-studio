@@ -94,7 +94,7 @@ describe('plugin center compatibility contract', () => {
       schemaVersion: 1,
       operationId: '019c1234-1234-1234-1234-123456789abc',
       idempotencyKey: request.idempotencyKey,
-      profileName: 'web',
+      profileName: 'desktop',
       action: 'install',
       pluginId: request.pluginId,
       version: request.version,
@@ -148,10 +148,18 @@ describe('plugin center compatibility contract', () => {
       ...preflight(), bundlePatch: '../cordis.patch.yml',
     })],
     ['unsupported release platform', () => decodeCompatibilityFingerprint({
-      ...fingerprint(), platform: 'linux-x64',
+      ...fingerprint(), platform: 'freebsd-x64',
     })],
   ])('rejects %s', (_name, run) => {
     expect(run).toThrow(CatalogContractError)
+  })
+
+  it('accepts every supported desktop platform', () => {
+    for (const platform of ['darwin-arm64', 'darwin-x64', 'win32-x64', 'linux-x64', 'linux-arm64']) {
+      expect(decodeCompatibilityFingerprint({ ...fingerprint(), platform })).toEqual({
+        ...fingerprint(), platform,
+      })
+    }
   })
 
   it('enforces stable compatibility and artifact reason ordering', () => {

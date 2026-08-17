@@ -44,7 +44,7 @@ afterEach(() => {
 function authorityFixture(): AuthorityFixture {
   const root = mkdtempSync(join(tmpdir(), 'dsh-plugin-preflight-'))
   roots.push(root)
-  const profile = join(root, 'profiles/web')
+  const profile = join(root, 'profiles/desktop')
   mkdirSync(profile, { recursive: true })
   writeFileSync(join(profile, 'package.json'), `${JSON.stringify({
     name: 'dsh-profile-web',
@@ -58,7 +58,7 @@ function authorityFixture(): AuthorityFixture {
 
   const fingerprint = (): CompatibilityFingerprint => readProfileCompatibilityFingerprint({
     homeDirectory: root,
-    profileName: 'web',
+    profileName: 'desktop',
     desktopVersion: '0.1.0-rc.5',
     dshVersion: '0.1.0-rc.5',
     nodeVersion: '22.22.0',

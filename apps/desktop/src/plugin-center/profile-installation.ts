@@ -130,7 +130,7 @@ export async function reconcileAndValidateInstalledBundle(input: {
 
   if (expectedEnabled) {
     const home = dirname(dirname(input.profileDirectory))
-    const loaded = loadProfile('desktop', 'web', input.installAnchor, home)
+    const loaded = loadProfile('desktop', 'desktop', input.installAnchor, home)
     if (!loaded.layers.some(layer => layer.packageName === input.candidate.packageName)) {
       throw new Error('reconciled Profile cannot resolve the validated Bundle layer')
     }

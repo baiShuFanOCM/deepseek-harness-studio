@@ -451,7 +451,7 @@ class DevelopmentInstalledRuntime {
     const appUpdateIncompatible = scenario() === 'compatibility-denied'
     const activeCatalogCount = Number(workspaceInstalled && workspaceEnabled) + Number(this.state.skillInstalled && skillEnabled)
     return {
-      profileName: 'web',
+      profileName: 'desktop',
       profileRevision: this.state.revision,
       catalogFreshness: scenario() === 'stale' ? 'stale' : 'fresh',
       items: [
@@ -692,7 +692,7 @@ class DevelopmentOperationRuntime {
       schemaVersion: 1,
       operationId: `dev-${request.action}-${String(this.sequence)}`,
       idempotencyKey: request.idempotencyKey,
-      profileName: 'web',
+      profileName: 'desktop',
       action: request.action,
       pluginId: request.pluginId,
       version: request.version,
@@ -742,7 +742,7 @@ class DevelopmentOperationRuntime {
       if (stored === null) return null
       const value = JSON.parse(stored) as Partial<PluginOperationSnapshot>
       return value.schemaVersion === 1
-        && value.profileName === 'web'
+        && value.profileName === 'desktop'
         && typeof value.action === 'string'
         && COMPATIBILITY_ACTIONS.includes(value.action)
         && typeof value.operationId === 'string'

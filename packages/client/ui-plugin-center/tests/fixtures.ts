@@ -14,7 +14,7 @@ import type {
 
 export function installedListResult(): InstalledPluginListResult {
   return {
-    profileName: 'web',
+    profileName: 'desktop',
     profileRevision: 7,
     catalogFreshness: 'fresh',
     items: [
@@ -262,7 +262,7 @@ export function operation(phase: PluginOperationPhase = 'preflight'): PluginOper
     schemaVersion: 1,
     operationId: 'operation-1',
     idempotencyKey: 'install:fixture.workspace-tools:1',
-    profileName: 'web',
+    profileName: 'desktop',
     action: 'install',
     pluginId: 'fixture.workspace-tools',
     version: '1.0.0',

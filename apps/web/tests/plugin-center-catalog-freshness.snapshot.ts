@@ -90,7 +90,7 @@ interface PluginOperation {
   schemaVersion: 1
   operationId: string
   idempotencyKey: string
-  profileName: 'web'
+  profileName: 'desktop'
   action: 'install'
   pluginId: string
   version: string
@@ -198,7 +198,7 @@ function operation(phase: OperationPhase, idempotencyKey = 'install:fixture.work
     schemaVersion: 1,
     operationId: 'operation-web-replay',
     idempotencyKey,
-    profileName: 'web',
+    profileName: 'desktop',
     action: 'install',
     pluginId: PLUGIN.pluginId,
     version: PLUGIN.version,

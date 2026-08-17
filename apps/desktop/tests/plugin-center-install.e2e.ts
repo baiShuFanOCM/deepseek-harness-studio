@@ -32,7 +32,7 @@ describe('trusted installation relaunch persistence', () => {
   it('relaunch without system pnpm retains the exact Bundle projection', async () => {
     const root = await temporaryRoot()
     const home = join(root, 'dsh-home')
-    const profile = join(home, 'profiles', 'web')
+    const profile = join(home, 'profiles', 'desktop')
     const candidate = BUNDLED_CATALOG.preflights.find(value => value.pluginId === 'fixture.workspace-tools')
     expect(candidate).toBeDefined()
     initProfile(profile, [])
@@ -77,7 +77,7 @@ describe('trusted installation relaunch persistence', () => {
 
     const readProjection = () => readProfileCompatibilityFingerprint({
       homeDirectory: home,
-      profileName: 'web',
+      profileName: 'desktop',
       desktopVersion: '0.1.0-rc.5',
       dshVersion: '0.1.0-rc.5',
       nodeVersion: process.versions.node,

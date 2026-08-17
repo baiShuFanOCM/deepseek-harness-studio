@@ -47,7 +47,7 @@ function fixture(): { readonly profile: string; readonly anchor: string } {
   const root = mkdtempSync(join(tmpdir(), 'dsh-installed-projection-'))
   roots.push(root)
   const installation = join(root, 'installation')
-  const profile = join(root, 'home/profiles/web')
+  const profile = join(root, 'home/profiles/desktop')
   mkdirSync(installation, { recursive: true })
   mkdirSync(profile, { recursive: true })
   const systemPackage = '@deepseek-ai/dsh-base'
@@ -161,7 +161,7 @@ describe('authority derived projection', () => {
         schemaVersion: 1,
         operationId: '019c1234-1234-1234-1234-123456789abc',
         idempotencyKey: 'disable:fixture.workspace-tools:019c',
-        profileName: 'web',
+        profileName: 'desktop',
         action: 'disable',
         pluginId: WORKSPACE.pluginId,
         version: WORKSPACE.version,
