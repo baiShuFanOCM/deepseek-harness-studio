@@ -13,7 +13,7 @@ const CATALOG_ETAG = 'bundled-f003-2026-08-15'
 const COMPATIBILITY = {
   status: 'compatible',
   reason: null,
-  platforms: ['darwin-arm64', 'win32-x64'],
+  platforms: ['darwin-arm64', 'darwin-x64', 'win32-x64', 'linux-x64', 'linux-arm64'],
 } as const
 
 const WORKSPACE_TOOLS = {
@@ -119,7 +119,7 @@ function preflight(
 ): CatalogVersionPreflight {
   const artifact = values.artifact
   const artifacts: readonly CatalogArtifactEvidence[] = summary.scope === 'public' && artifact !== undefined
-    ? (['darwin-arm64', 'win32-x64'] as const).map(platform => ({
+    ? (['darwin-arm64', 'darwin-x64', 'win32-x64', 'linux-x64', 'linux-arm64'] as const).map(platform => ({
       platform,
       url: `https://cdn.deepseek.com/plugins/${summary.pluginId}/${summary.version}/${platform}.tgz`,
       ...artifact,

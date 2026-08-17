@@ -32,7 +32,10 @@ export interface CompatibilityEnvironmentInput {
  */
 export function resolveSupportedPluginPlatform(os: NodeJS.Platform, architecture: string): SupportedPluginPlatform {
   if (os === 'darwin' && architecture === 'arm64') return 'darwin-arm64'
+  if (os === 'darwin' && architecture === 'x64') return 'darwin-x64'
   if (os === 'win32' && architecture === 'x64') return 'win32-x64'
+  if (os === 'linux' && architecture === 'x64') return 'linux-x64'
+  if (os === 'linux' && architecture === 'arm64') return 'linux-arm64'
   throw new Error(`plugin mutation is unsupported on ${os}-${architecture}`)
 }
 

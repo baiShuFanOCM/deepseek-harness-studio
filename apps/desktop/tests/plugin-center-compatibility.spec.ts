@@ -123,11 +123,13 @@ describe('plugin center release environment', () => {
     expect(fingerprint.protectedEntryIds).toEqual(systemComponents.entryIds)
   })
 
-  it('maps only the two release mutation targets', () => {
+  it('maps the supported release mutation targets', () => {
     expect(resolveSupportedPluginPlatform('darwin', 'arm64')).toBe('darwin-arm64')
+    expect(resolveSupportedPluginPlatform('darwin', 'x64')).toBe('darwin-x64')
     expect(resolveSupportedPluginPlatform('win32', 'x64')).toBe('win32-x64')
-    expect(() => resolveSupportedPluginPlatform('linux', 'x64')).toThrow('unsupported')
-    expect(() => resolveSupportedPluginPlatform('darwin', 'x64')).toThrow('unsupported')
+    expect(resolveSupportedPluginPlatform('linux', 'x64')).toBe('linux-x64')
+    expect(resolveSupportedPluginPlatform('linux', 'arm64')).toBe('linux-arm64')
+    expect(() => resolveSupportedPluginPlatform('darwin', 'arm')).toThrow('unsupported')
   })
 
   it('returns one exact compatible action with prerelease-aware ranges', () => {

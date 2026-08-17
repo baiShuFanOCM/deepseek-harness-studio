@@ -26,6 +26,7 @@ import {
 } from '@deepseek-ai/dsh-plugin-center-contracts'
 import { verifyPluginArtifact } from './artifact-verifier.ts'
 import { CatalogCache } from './catalog-cache.ts'
+import { resolveSupportedPluginPlatform } from './environment.ts'
 import type {
   CatalogInstalledAuthority,
   CatalogPreflightSelection,
@@ -299,7 +300,7 @@ function summaryFor(reference: Omit<NpmPackageReference, 'summary'>, values: {
     compatibility: {
       status: 'unknown',
       reason: '安装前会下载确定版本并完成兼容性与产物校验。',
-      platforms: ['darwin-arm64', 'win32-x64'],
+      platforms: ['darwin-arm64', 'darwin-x64', 'win32-x64', 'linux-x64', 'linux-arm64'],
     },
     updatedAt: values.updatedAt,
     installed: false,
@@ -1184,7 +1185,7 @@ export class NpmEcosystemCatalogRepository implements PluginCatalogRepository {
       desktopRange: '>=0.1.0-rc.1 <0.2.0',
       dshRange: '>=0.1.0-rc.1 <0.2.0',
       nodeRange: reference.nodeRange,
-      artifacts: (['darwin-arm64', 'win32-x64'] as const).map(platform => ({
+      artifacts: (['darwin-arm64', 'darwin-x64', 'win32-x64', 'linux-x64', 'linux-arm64'] as const).map(platform => ({
         platform,
         url: reference.tarballUrl,
         sha256: createHash('sha256').update(bytes).digest('hex'),
@@ -1205,7 +1206,11 @@ export class NpmEcosystemCatalogRepository implements PluginCatalogRepository {
       supportedActions: ['install', 'update', 'enable', 'disable', 'uninstall'],
       restartRequired: true,
     })
-    const verification = await verifyPluginArtifact({ bytes, candidate, platform: 'darwin-arm64' })
+    const verification = await verifyPluginArtifact({
+      bytes,
+      candidate,
+      platform: resolveSupportedPluginPlatform(process.platform, process.arch),
+    })
     if (!verification.verified) throw new Error('npm Bundle failed non-executing artifact verification')
     const detail: CatalogDetail = {
       summary: verifiedSummary,
