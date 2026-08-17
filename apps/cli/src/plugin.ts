@@ -107,13 +107,26 @@ export function runPlugin(profile: string, args: readonly string[]): number {
     process.stderr.write(`${NAME}: initialized profile ${profile} at ${dir}\n`)
   }
   const before = readProfileManifest(NAME, dir)
-  // Windows resolves pnpm through its .cmd shim, which spawn() refuses
-  // without a shell since the CVE-2024-27980 hardening.
-  const result = spawnSync('pnpm', args.map(argument => anchorPathSpec(argument, process.cwd())), {
-    cwd: dir,
-    stdio: 'inherit',
-    shell: process.platform === 'win32',
-  })
+  const anchored = args.map(argument => anchorPathSpec(argument, process.cwd()))
+  // Desktop hosts launch through Electron's bundled Node with a minimal PATH;
+  // the packaged pnpm entry is injected so profile management never depends on
+  // a PATH pnpm. The entry runs under this process's own Node executable, so
+  // it matches the Host ABI (ELECTRON_RUN_AS_NODE selects Node mode there).
+  const entry = process.env.DSH_PNPM_ENTRY
+  const result = entry === undefined
+    // Windows resolves pnpm through its .cmd shim, which spawn() refuses
+    // without a shell since the CVE-2024-27980 hardening.
+    ? spawnSync('pnpm', anchored, {
+      cwd: dir,
+      stdio: 'inherit',
+      shell: process.platform === 'win32',
+    })
+    : spawnSync(process.execPath, [entry, ...anchored], {
+      cwd: dir,
+      stdio: 'inherit',
+      shell: false,
+      env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
+    })
   if (result.error !== undefined) {
     const code = (result.error as NodeJS.ErrnoException).code
     if (code === 'ENOENT') {

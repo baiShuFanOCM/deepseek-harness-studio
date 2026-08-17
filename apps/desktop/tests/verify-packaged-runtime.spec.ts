@@ -11,10 +11,12 @@ function context(
   appOutDir: string,
   electronPlatformName = 'darwin',
   publish: unknown = [{ provider: 'generic', url: UPDATE_URL, channel: 'rc' }],
+  arch: string = 'x64',
 ) {
   return {
     appOutDir,
     electronPlatformName,
+    arch,
     packager: {
       appInfo: {
         productFilename: 'DeepSeek Harness',
@@ -22,7 +24,9 @@ function context(
       },
       config: { publish },
     },
-  } as Parameters<typeof afterPack>[0]
+    outDir: appOutDir,
+    targets: [],
+  } as unknown as Parameters<typeof afterPack>[0]
 }
 
 async function writeRequiredMacRuntime(appOutDir: string): Promise<void> {
@@ -152,6 +156,45 @@ describe('packaged desktop runtime verification', () => {
       await expect(afterPack(context(appOutDir, 'win32'))).resolves.toBeUndefined()
       await rm(join(modules, 'node-pty', 'prebuilds', 'win32-x64', 'conpty.node'))
       await expect(afterPack(context(appOutDir, 'win32'))).rejects.toMatchObject({ code: 'ENOENT' })
+    } finally {
+      await rm(appOutDir, { recursive: true, force: true })
+    }
+  })
+
+  it.each([
+    ['linux-x64', 'linux', 'x64', 'linux-x64',
+      ['@deepseek-ai', 'node-addon-landlock-run-linux-x64', 'bin', 'landlock-run'],
+      ['node-addon-require-builtin-linux-x64-gnu', 'prebuilt', 'linux-x64-gnu-napi-v9.node']],
+    ['linux-arm64', 'linux', 'arm64', 'linux-arm64',
+      ['@deepseek-ai', 'node-addon-landlock-run-linux-arm64', 'bin', 'landlock-run'],
+      ['node-addon-require-builtin-linux-arm64-gnu', 'prebuilt', 'linux-arm64-gnu-napi-v9.node']],
+  ])('requires %s native modules in a %s package', async (_label, platform, arch, tuple, landlock, requireBuiltin) => {
+    const appOutDir = await mkdtemp(join(tmpdir(), `dsh-packaged-runtime-${tuple}-`))
+    try {
+      const modules = join(appOutDir, 'resources', 'host', 'node_modules')
+      const required = [
+        ['@deepseek-ai', 'dsh', 'lib', 'bin.js'],
+        ['@deepseek-ai', 'dsh-web-frontend', 'dist', 'index.html'],
+        ['@deepseek-ai', 'dsh-web-frontend', 'dist', 'dsh-desktop', 'default-background.webp'],
+        ['@deepseek-ai', 'dsh-web-frontend', 'dist', 'dsh-desktop', 'cloud-cat-background.webp'],
+        ['@deepseek-ai', 'dsh-web-frontend', 'dist', 'dsh-desktop', 'beyondata-logo.png'],
+        ['pnpm', 'bin', 'pnpm.cjs'],
+        ['@koromix', `koffi-${tuple}`, `${tuple.replace('-', '_')}`, 'koffi.node'],
+        ['node-pty', 'prebuilds', tuple, 'pty.node'],
+        ['@img', `sharp-${tuple}`, 'lib', `sharp-${tuple}-test.node`],
+        requireBuiltin,
+        landlock,
+      ]
+      for (const segments of required) {
+        const file = join(modules, ...segments)
+        await mkdir(join(file, '..'), { recursive: true })
+        await writeFile(file, '')
+      }
+      await writeFile(join(modules, 'pnpm/package.json'), JSON.stringify({ version: '11.7.0' }))
+
+      await expect(afterPack(context(appOutDir, platform, undefined, arch))).resolves.toBeUndefined()
+      await rm(join(modules, ...landlock))
+      await expect(afterPack(context(appOutDir, platform, undefined, arch))).rejects.toMatchObject({ code: 'ENOENT' })
     } finally {
       await rm(appOutDir, { recursive: true, force: true })
     }

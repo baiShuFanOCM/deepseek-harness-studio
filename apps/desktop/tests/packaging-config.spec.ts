@@ -20,6 +20,7 @@ interface DesktopPackage {
       readonly notarize: boolean
     }
     readonly win: { readonly artifactName: string; readonly icon: string; readonly target: readonly string[] }
+    readonly linux: { readonly artifactName: string; readonly category: string; readonly icon: string; readonly target: readonly string[] }
     readonly nsis: {
       readonly oneClick: boolean
       readonly perMachine: boolean
@@ -192,6 +193,16 @@ describe('desktop packaging configuration', () => {
     expect(windowsInstallerInclude).not.toContain('DeleteRegKey SHELL_CONTEXT')
   })
 
+  it('builds Linux AppImage and deb packages for x64 and arm64 from a Linux-targeted runtime', () => {
+    expect(desktopPackage.scripts['dist:linux']).toContain('DSH_DESKTOP_TARGET_PLATFORM=linux')
+    expect(desktopPackage.scripts['dist:linux']).toContain('DSH_DESKTOP_TARGET_ARCH=x64')
+    expect(desktopPackage.build.linux.target).toEqual(['AppImage', 'deb'])
+    expect(desktopPackage.build.linux.artifactName)
+      .toBe('DeepSeek-Harness-Desktop-Linux-${arch}-${version}.${ext}')
+    expect(desktopPackage.build.linux.category).toBe('Development')
+    expect(desktopPackage.build.linux.icon).toBe('build/icon.png')
+  })
+
   it('exposes generic, macOS, and Windows release commands at the repository root', () => {
     expect(rootPackage.scripts['dist:desktop'])
       .toBe('pnpm --filter @deepseek-ai/dsh-desktop run dist')
@@ -199,6 +210,8 @@ describe('desktop packaging configuration', () => {
       .toBe('pnpm --filter @deepseek-ai/dsh-desktop run dist:mac')
     expect(rootPackage.scripts['dist:win:desktop'])
       .toBe('pnpm --filter @deepseek-ai/dsh-desktop run dist:win')
+    expect(rootPackage.scripts['dist:linux:desktop'])
+      .toBe('pnpm --filter @deepseek-ai/dsh-desktop run dist:linux')
     expect(rootPackage.scripts['publish:desktop-update'])
       .toBe('pnpm --filter @deepseek-ai/dsh-desktop run publish:update')
   })

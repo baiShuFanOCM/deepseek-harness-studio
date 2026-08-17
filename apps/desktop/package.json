@@ -14,6 +14,7 @@
     "dist": "pnpm --workspace-root run build && node --import tsx scripts/stage-runtime.ts && electron-builder",
     "dist:mac": "node --import tsx scripts/release-mac.ts",
     "dist:win": "pnpm --workspace-root run build && DSH_DESKTOP_TARGET_PLATFORM=win32 DSH_DESKTOP_TARGET_ARCH=x64 node --import tsx scripts/stage-runtime.ts && node --import tsx scripts/release-win.ts",
+    "dist:linux": "pnpm --workspace-root run build && DSH_DESKTOP_TARGET_PLATFORM=linux DSH_DESKTOP_TARGET_ARCH=x64 node --import tsx scripts/stage-runtime.ts && pnpm exec electron-builder --linux AppImage deb --x64",
     "publish:update": "node --import tsx scripts/publish-update.ts"
   },
   "license": "MIT",
@@ -56,6 +57,10 @@
       {
         "from": "resources",
         "to": "desktop-resources"
+      },
+      {
+        "from": "build/icon.png",
+        "to": "desktop-resources/icon.png"
       },
       {
         "from": "runtime-host/package.json",
@@ -103,8 +108,11 @@
     },
     "linux": {
       "category": "Development",
+      "icon": "build/icon.png",
+      "artifactName": "DeepSeek-Harness-Desktop-Linux-${arch}-${version}.${ext}",
       "target": [
-        "dir"
+        "AppImage",
+        "deb"
       ]
     }
   }

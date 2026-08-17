@@ -2,7 +2,7 @@
 
 import { access, readFile, readdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import type { AfterPackContext } from 'electron-builder'
+import { Arch, type AfterPackContext } from 'electron-builder'
 import { dump } from 'js-yaml'
 import {
   PACKAGE_MANAGER_ENTRY_SEGMENTS,
@@ -29,6 +29,33 @@ interface GenericUpdateConfiguration {
   readonly url: string
   readonly updaterCacheDirName: string
   readonly channel: string
+}
+
+const REQUIRED_LINUX_HOST_FILES = {
+  x64: [
+    ['@deepseek-ai', 'node-addon-landlock-run-linux-x64', 'bin', 'landlock-run'],
+    ['@koromix', 'koffi-linux-x64', 'linux_x64', 'koffi.node'],
+    ['node-addon-require-builtin-linux-x64-gnu', 'prebuilt', 'linux-x64-gnu-napi-v9.node'],
+    ['node-pty', 'prebuilds', 'linux-x64', 'pty.node'],
+  ],
+  arm64: [
+    ['@deepseek-ai', 'node-addon-landlock-run-linux-arm64', 'bin', 'landlock-run'],
+    ['@koromix', 'koffi-linux-arm64', 'linux_arm64', 'koffi.node'],
+    ['node-addon-require-builtin-linux-arm64-gnu', 'prebuilt', 'linux-arm64-gnu-napi-v9.node'],
+    ['node-pty', 'prebuilds', 'linux-arm64', 'pty.node'],
+  ],
+} as const
+
+/** One Linux packaging architecture with its staged native-module inventory. */
+function requiredLinuxHostFiles(arch: Arch | string): { files: readonly (readonly string[])[]; sharp: string } {
+  const name = typeof arch === 'string' ? arch : Arch[arch]
+  if (name === 'x64') {
+    return { files: REQUIRED_LINUX_HOST_FILES.x64, sharp: 'sharp-linux-x64' }
+  }
+  if (name === 'arm64') {
+    return { files: REQUIRED_LINUX_HOST_FILES.arm64, sharp: 'sharp-linux-arm64' }
+  }
+  throw new Error(`unsupported Linux packaging architecture: ${name}`)
 }
 
 /**
@@ -59,6 +86,16 @@ export async function afterPack(context: AfterPackContext): Promise<void> {
     const sharpFiles = await readdir(join(modules, '@img', 'sharp-win32-x64', 'lib'))
     if (!sharpFiles.some(file => /^sharp-win32-x64-.*\.node$/.test(file))) {
       throw new Error('Windows x64 Sharp native module is missing from the packaged Host runtime')
+    }
+  }
+  if (context.electronPlatformName === 'linux') {
+    const linux = requiredLinuxHostFiles(context.arch)
+    for (const segments of linux.files) {
+      await access(join(modules, ...segments))
+    }
+    const sharpFiles = await readdir(join(modules, '@img', linux.sharp, 'lib'))
+    if (!sharpFiles.some(file => new RegExp(`^${linux.sharp}-.*\\.node$`).test(file))) {
+      throw new Error(`${linux.sharp} Sharp native module is missing from the packaged Host runtime`)
     }
   }
   await writeFile(

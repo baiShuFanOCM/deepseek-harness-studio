@@ -87,4 +87,34 @@ describe('dsh plugin reconciliation', () => {
     expect(mocks.writeProfileManifest).toHaveBeenCalledWith('/profiles/demo', reconciled)
     expect(stderr).toHaveBeenCalledWith(expect.stringContaining('plain-library declares no dsh.bundle'))
   })
+
+  it('runs the injected bundled package manager entry with the host Node runtime', () => {
+    mocks.readProfileManifest.mockReturnValue({ dependencies: {}, dsh: { profile: { bundles: ['base'] } } })
+    mocks.reconcileProfileBundles.mockReturnValue({
+      manifest: { dependencies: {}, dsh: { profile: { bundles: ['base'] } } },
+      changed: false,
+      addedBundles: [],
+      removedBundles: [],
+      addedPlainDependencies: [],
+    })
+    const previousEntry = process.env.DSH_PNPM_ENTRY
+    process.env.DSH_PNPM_ENTRY = '/Applications/DeepSeek Harness.app/Contents/Resources/host/node_modules/pnpm/bin/pnpm.mjs'
+    try {
+      expect(runPlugin('demo', ['add', 'installed-bundle'])).toBe(0)
+
+      expect(mocks.spawnSync).toHaveBeenCalledWith(
+        process.execPath,
+        ['/Applications/DeepSeek Harness.app/Contents/Resources/host/node_modules/pnpm/bin/pnpm.mjs', 'add', 'installed-bundle'],
+        expect.objectContaining({
+          cwd: '/profiles/demo',
+          stdio: 'inherit',
+          shell: false,
+          env: expect.objectContaining({ ELECTRON_RUN_AS_NODE: '1' }),
+        }),
+      )
+    } finally {
+      if (previousEntry === undefined) delete process.env.DSH_PNPM_ENTRY
+      else process.env.DSH_PNPM_ENTRY = previousEntry
+    }
+  })
 })

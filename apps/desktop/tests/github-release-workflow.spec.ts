@@ -14,13 +14,16 @@ const chineseReadme = readFileSync(resolve(repositoryRoot, 'README.md'), 'utf8')
 const englishReadme = readFileSync(resolve(repositoryRoot, 'README.en.md'), 'utf8')
 
 describe('desktop GitHub Release workflow', () => {
-  it('binds release assets to one exact Desktop tag and both native builds', () => {
+  it('binds release assets to one exact Desktop tag and all three native builds', () => {
     expect(workflow).toContain('desktop-v${version}')
     expect(workflow).toContain('elif [[ "$version" == *-* ]]')
-    expect(workflow).toContain('needs: [prepare, macos, windows]')
+    expect(workflow).toContain('needs: [prepare, macos, windows, linux]')
     expect(workflow).toContain('run dist:mac -- --arm64')
     expect(workflow).toContain("$env:DSH_DESKTOP_TARGET_PLATFORM = 'win32'")
     expect(workflow).toContain("$env:DSH_DESKTOP_TARGET_ARCH = 'x64'")
+    expect(workflow).toContain('DSH_DESKTOP_TARGET_PLATFORM: linux')
+    expect(workflow).toContain('ubuntu-24.04')
+    expect(workflow).toContain('DSH_DESKTOP_TARGET_ARCH: ${{ matrix.arch }}')
   })
 
   it('requires native signatures and publishes only a complete draft with checksums', () => {
@@ -32,6 +35,8 @@ describe('desktop GitHub Release workflow', () => {
     expect(workflow).toContain('--draft')
     expect(workflow.indexOf('gh release create')).toBeLessThan(workflow.indexOf('gh release edit'))
     expect(workflow).toContain('gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false')
+    expect(workflow).toContain('for extension in dmg zip exe')
+    expect(workflow).toContain('for extension in AppImage deb')
   })
 
   it('keeps the bilingual public download entry on the Studio repository', () => {
@@ -41,7 +46,9 @@ describe('desktop GitHub Release workflow', () => {
       expect(readme).not.toContain('https://github.com/fufankeji/deepseek-harness-desktop')
     }
     expect(chineseReadme).toContain('下载 Windows x64')
+    expect(chineseReadme).toContain('下载 Linux')
     expect(englishReadme).toContain('Download the Windows x64')
+    expect(englishReadme).toContain('Download Linux')
   })
 
   it('keeps preview diagnostics in Actions and exposes only the Windows installer', () => {

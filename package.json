@@ -142,6 +142,7 @@
     "dist:desktop": "pnpm --filter @deepseek-ai/dsh-desktop run dist",
     "dist:mac:desktop": "pnpm --filter @deepseek-ai/dsh-desktop run dist:mac",
     "dist:win:desktop": "pnpm --filter @deepseek-ai/dsh-desktop run dist:win",
+    "dist:linux:desktop": "pnpm --filter @deepseek-ai/dsh-desktop run dist:linux",
     "publish:desktop-update": "pnpm --filter @deepseek-ai/dsh-desktop run publish:update",
     "demo:code-mode": "node scripts/demo-code-mode.mjs",
     "demo:cordis": "node scripts/demo-cordis.mjs",

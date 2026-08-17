@@ -12,7 +12,7 @@ const OSS_BUCKET = 'ml2022'
 const RELEASE_PREFIX = 'deepseek-harness-desktop/releases'
 const PUBLIC_ORIGIN = `https://${OSS_BUCKET}.${OSS_REGION}.aliyuncs.com`
 
-type Platform = 'mac' | 'windows'
+type Platform = 'mac' | 'windows' | 'linux'
 type PayloadKind = 'artifact' | 'blockmap' | 'metadata'
 
 interface ReleaseFile {
@@ -82,10 +82,7 @@ export function collectReleaseBundle(directories: readonly string[], options: Co
     if (metadataNames.length === 0) throw new Error(`发布目录缺少渠道 yml：${directory}`)
 
     for (const metadataName of metadataNames) {
-      if (metadataName.endsWith('-linux.yml')) {
-        throw new Error(`Linux 在线更新发布尚未接入：${metadataName}`)
-      }
-      const platform: Platform = metadataName.endsWith('-mac.yml') ? 'mac' : 'windows'
+      const platform = platformFromMetadataName(metadataName)
       const channel = channelFromMetadataName(metadataName, platform)
       const metadataPath = join(directory, metadataName)
       const metadata = parseMetadata(metadataPath)
@@ -243,10 +240,20 @@ function safeArtifactName(url: string, metadataPath: string): string {
 }
 
 function channelFromMetadataName(name: string, platform: Platform): string {
-  const suffix = platform === 'mac' ? '-mac.yml' : '.yml'
+  const suffix = platform === 'mac' ? '-mac.yml'
+    : platform === 'linux'
+      ? name.endsWith('-linux-arm64.yml') ? '-linux-arm64.yml' : '-linux.yml'
+      : '.yml'
   const channel = name.slice(0, -suffix.length)
   if (!/^[a-z0-9][a-z0-9._-]*$/i.test(channel)) throw new Error(`无效渠道文件名：${name}`)
   return channel
+}
+
+/** Map one channel metadata filename to its update platform. */
+function platformFromMetadataName(name: string): Platform {
+  if (name.endsWith('-mac.yml')) return 'mac'
+  if (name.endsWith('-linux.yml') || name.endsWith('-linux-arm64.yml')) return 'linux'
+  return 'windows'
 }
 
 function payloadFor(kind: PayloadKind, localPath: string, objectName: string): ReleasePayload {

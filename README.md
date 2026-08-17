@@ -15,7 +15,7 @@
   <img src="https://img.shields.io/badge/Application%20Center-online-0F9D8A" alt="应用中心已上线">
   <img src="https://img.shields.io/badge/Vision-Qwen3.8-7C3AED" alt="Qwen3.8 视觉增强">
   <a href="LICENSE"><img src="https://img.shields.io/github/license/fufankeji/deepseek-harness-studio?color=22C55E" alt="MIT License"></a>
-  <img src="https://img.shields.io/badge/macOS%20%7C%20Windows-supported-3B82F6" alt="macOS and Windows">
+  <img src="https://img.shields.io/badge/macOS%20%7C%20Windows%20%7C%20Linux-supported-3B82F6" alt="macOS, Windows and Linux">
 </p>
 
 <p align="center"><a href="https://www.beyondata.com/"><strong>官方网站</strong></a> · <strong>中文</strong> · <a href="README.en.md">English</a></p>
@@ -26,7 +26,7 @@
 
 <p align="center">自动发现并推送生态新插件，AI 智能推荐值得安装的能力；无需命令行即可完成搜索、校验、安装、启停与卸载。</p>
 
-<p align="center"><a href="https://github.com/fufankeji/deepseek-harness-studio/releases/download/desktop-preview-v0.1.0-rc.9/DeepSeek-Harness-Desktop-0.1.0-rc.9-macos-arm64-preview.zip"><strong>下载 macOS arm64 开发预览版</strong></a> · <a href="https://github.com/fufankeji/deepseek-harness-studio/releases/download/desktop-preview-v0.1.0-rc.9/DeepSeek-Harness-Desktop-Windows-x64-0.1.0-rc.9-Setup.exe"><strong>下载 Windows x64 开发预览版</strong></a></p>
+<p align="center"><a href="https://github.com/fufankeji/deepseek-harness-studio/releases/download/desktop-preview-v0.1.0-rc.9/DeepSeek-Harness-Desktop-0.1.0-rc.9-macos-arm64-preview.zip"><strong>下载 macOS arm64 开发预览版</strong></a> · <a href="https://github.com/fufankeji/deepseek-harness-studio/releases/download/desktop-preview-v0.1.0-rc.9/DeepSeek-Harness-Desktop-Windows-x64-0.1.0-rc.9-Setup.exe"><strong>下载 Windows x64 开发预览版</strong></a> · <a href="https://github.com/fufankeji/deepseek-harness-studio/releases"><strong>下载 Linux x64 / arm64 开发预览版（AppImage / deb）</strong></a></p>
 
 <p align="center">
   <img src="assets/plugin-discovery-hero.jpg" alt="DeepSeek Harness Studio 视觉增强、插件市场、Preset 广场、零代码一键部署、插件自动推送与 AI 智能推荐" width="100%">
@@ -308,9 +308,9 @@ FF–LLM Wiki 面向企业文档分散、知识关系难整理、问答结果无
 
 ## 下载桌面端
 
-> GitHub Releases 已提供经过真实 Electron 验收的 macOS Apple Silicon 预览 ZIP 和 Windows x64 预览安装程序，运行桌面端无需另行安装 Node.js 或 pnpm。当前均为开发预览资产；正式版本仍将提供完成平台签名的 macOS `.dmg` 和 Windows x64 `.exe`。
+> GitHub Releases 已提供经过真实 Electron 验收的 macOS Apple Silicon 预览 ZIP、Windows x64 预览安装程序以及 Linux x64 / arm64 预览包（AppImage 与 deb），运行桌面端无需另行安装 Node.js 或 pnpm。当前均为开发预览资产；正式版本仍将提供完成平台签名的 macOS `.dmg`、Windows x64 `.exe` 和 Linux `.AppImage` / `.deb`。
 
-<p align="center"><a href="https://github.com/fufankeji/deepseek-harness-studio/releases/download/desktop-preview-v0.1.0-rc.9/DeepSeek-Harness-Desktop-0.1.0-rc.9-macos-arm64-preview.zip"><strong>下载 macOS arm64 预览版</strong></a> · <a href="https://github.com/fufankeji/deepseek-harness-studio/releases/download/desktop-preview-v0.1.0-rc.9/DeepSeek-Harness-Desktop-Windows-x64-0.1.0-rc.9-Setup.exe"><strong>下载 Windows x64 安装程序</strong></a></p>
+<p align="center"><a href="https://github.com/fufankeji/deepseek-harness-studio/releases/download/desktop-preview-v0.1.0-rc.9/DeepSeek-Harness-Desktop-0.1.0-rc.9-macos-arm64-preview.zip"><strong>下载 macOS arm64 预览版</strong></a> · <a href="https://github.com/fufankeji/deepseek-harness-studio/releases/download/desktop-preview-v0.1.0-rc.9/DeepSeek-Harness-Desktop-Windows-x64-0.1.0-rc.9-Setup.exe"><strong>下载 Windows x64 安装程序</strong></a> · <a href="https://github.com/fufankeji/deepseek-harness-studio/releases"><strong>下载 Linux x64 / arm64（AppImage / deb）</strong></a></p>
 
 ### macOS arm64
 

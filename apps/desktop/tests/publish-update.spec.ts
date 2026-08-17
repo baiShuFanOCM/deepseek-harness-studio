@@ -36,6 +36,18 @@ describe('desktop update publisher', () => {
     }).version).toBe('1.2.3-rc.4')
   })
 
+  it('accepts Linux x64 and arm64 channel metadata with AppImage payloads', () => {
+    for (const [metadataName, artifactName, channel] of [
+      ['rc-linux.yml', 'Harness-1.2.3-rc.4.AppImage', 'rc'],
+      ['rc-linux-arm64.yml', 'Harness-1.2.3-rc.4-arm64.AppImage', 'rc'],
+    ] as const) {
+      const directory = releaseDirectory(metadataName, artifactName)
+      const bundle = collectReleaseBundle([directory], { currentVersion: '1.2.3-rc.4', allowCurrentBaseline: false })
+      expect(bundle.channel).toBe(channel)
+      expect(bundle.payloads.map(payload => payload.kind).sort()).toEqual(['artifact', 'blockmap', 'metadata'])
+    }
+  })
+
   it('rejects metadata paths that escape the release directory', () => {
     const directory = releaseDirectory('rc.yml', '../outside.exe')
     expect(() => collectReleaseBundle([directory], {

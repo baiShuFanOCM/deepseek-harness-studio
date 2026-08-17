@@ -226,9 +226,59 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  linux:
+    name: Linux ${{ matrix.arch }} AppImage and deb
+    needs: prepare
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, arm64]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          ref: ${{ needs.prepare.outputs.tag }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          dest: ${{ runner.temp }}/setup-pnpm
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.PRIMARY_NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build ${{ matrix.arch }} AppImage and deb
+        env:
+          DSH_DESKTOP_TARGET_PLATFORM: linux
+          DSH_DESKTOP_TARGET_ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          pnpm run build
+          pnpm --dir apps/desktop exec node --import tsx scripts/stage-runtime.ts
+          pnpm --dir apps/desktop exec electron-builder --linux AppImage deb --${{ matrix.arch }}
+
+      - name: Upload Linux release assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-linux-${{ matrix.arch }}
+          path: |
+            apps/desktop/dist/*.AppImage
+            apps/desktop/dist/*.AppImage.blockmap
+            apps/desktop/dist/*.deb
+            apps/desktop/dist/*-linux.yml
+            !apps/desktop/dist/builder-*.yml
+          if-no-files-found: error
+          retention-days: 7
+
   publish:
     name: Publish GitHub Release
-    needs: [prepare, macos, windows]
+    needs: [prepare, macos, windows, linux]
     runs-on: ubuntu-24.04
     environment: desktop-release
     permissions:
@@ -249,6 +299,13 @@ jobs:
             count=$(find release-assets -type f -name "*.${extension}" | wc -l | tr -d ' ')
             if [[ "$count" -ne 1 ]]; then
               echo "Expected exactly one .${extension} asset; found ${count}." >&2
+              exit 1
+            fi
+          done
+          for extension in AppImage deb; do
+            count=$(find release-assets -type f -name "*.${extension}" | wc -l | tr -d ' ')
+            if [[ "$count" -ne 2 ]]; then
+              echo "Expected exactly two .${extension} assets (x64 and arm64); found ${count}." >&2
               exit 1
             fi
           done
@@ -276,6 +333,7 @@ jobs:
 
           - macOS Apple Silicon: signed and notarized DMG
           - Windows x64: Authenticode-signed NSIS installer
+          - Linux x64 and arm64: AppImage and deb packages
           - SHA256SUMS: checksums for every published asset
           EOF
           mapfile -d '' assets < <(find release-assets -type f -print0 | sort -z)
